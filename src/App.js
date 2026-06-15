@@ -19,26 +19,37 @@ export default function App() {
   //STATES & VARIABLES
   const gameLength = 10;
 
-  const [stage, setStage] = useState(1);
+  const [stage, setStage] = useState(0);
+  const [gameOn, setGameOn] = useState(false)
 
   //FUNCTIONS
   function nextStage(){
-    if (stage>=10) return;
-    setStage(stage=>stage+1)
+    if (stage===0 && !gameOn) handleStartGame();
+    if (stage>=gameLength) handleLastStage();
+    else setStage(stage=>stage+1);
   }
   function prevStage(){
     if (stage<=1) return;
-    setStage(stage=>stage-1)
+    setStage(stage=>stage-1);
+  }
+
+  function handleStartGame(){
+     alert("Started game");
+     setGameOn(true)
+  }
+  function handleLastStage(){
+    alert("Game completed");
+    setGameOn(false)
   }
 
   return (
     <div className="App">
       <h1>
-        FLAG QUIZ stage: {stage}/{gameLength}
+        FLAG QUIZ stage: {stage}/{gameLength} {gameOn ? "Game On" : "Game Off"}
       </h1>
       <button className="stage-navigation" onClick={()=>prevStage()}>{"<"}</button>
       <button className="stage-navigation" onClick={()=>nextStage()}>{">"}</button>
-      <Quiz />
+      {gameOn && <Quiz />}
     </div>
   );
 }
@@ -69,17 +80,25 @@ function Flag() {
   );
 }
 function Answers() {
+  const [selected, setSelected] = useState(null)
+  function handleSelect(){
+    if (!selected) setSelected(1);
+    else setSelected(null)
+  }
+  console.log(selected)
+
   return (
     <div>
-      <Option>Option 1</Option>
+      <Option selected ={selected} onSelect={handleSelect}>Option 1</Option>
       <Option>Option 2</Option>
       <Option>Option 3</Option>
       <Option>Option 4</Option>
     </div>
   );
 }
-function Option({ children }) {
-  return <button>{children}</button>;
+function Option({ children, selected, onSelect }) {
+  
+  return <button onClick={onSelect} style={selected && {backgroundColor: "gray", color: "white"}}>{children}</button>;
 }
 function ProgressBar() {
   return (
