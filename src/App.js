@@ -20,13 +20,24 @@ export default function App() {
   const gameLength = 10;
 
   const [stage, setStage] = useState(1);
-  
 
   //FUNCTIONS
+  function nextStage(){
+    if (stage>=10) return;
+    setStage(stage=>stage+1)
+  }
+  function prevStage(){
+    if (stage<=1) return;
+    setStage(stage=>stage-1)
+  }
 
   return (
     <div className="App">
-      <h1>FLAG QUIZ</h1>
+      <h1>
+        FLAG QUIZ stage: {stage}/{gameLength}
+      </h1>
+      <button className="stage-navigation" onClick={()=>prevStage()}>{"<"}</button>
+      <button className="stage-navigation" onClick={()=>nextStage()}>{">"}</button>
       <Quiz />
     </div>
   );
