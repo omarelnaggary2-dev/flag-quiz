@@ -8,11 +8,14 @@ function getRandomCountry(data) {
 }
 
 function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
+  const arr = [...array];
+
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return array;
+
+  return arr;
 }
 
 async function fetchCountryData() {
@@ -32,9 +35,44 @@ async function fetchCountryData() {
   return countries;
 }
 
+async function createLevel(data, len) {
+  const entries = Object.entries(data); //CONVERT
+  const shuffledEntries = shuffle(entries);
+
+  //CREATE QUESTIONS
+  const questions = shuffledEntries
+    .slice(0, len)
+    .map(([correctCode, correctName], index) => {
+      //TAKE 3 DISTRACTORS (NEXT 3 ELEMENTS IN ARRAY)
+      const distractors = shuffledEntries.slice(len + index, len + index + 3);
+
+      //COMBINE CORRECT + DISTRACTORS
+      const rawOptions = [[correctCode, correctName], ...distractors];
+
+      //BUILD OPTIONS ARRAY * len
+
+      const options = rawOptions.map(([code, name]) => ({
+        countryName: name,
+        countryCode: code,
+        isCorrect: code === correctCode,
+      }));
+
+      //SHUFFLE THE 4 OPTIONS
+      const shuffledOptions = shuffle(options);
+
+      //RETURN IMAGE LINK + LEVEL OPTIONS DATA
+      return {
+        imageLink: `https://flagcdn.com/w160/${correctCode}.png`,
+        options: shuffledOptions,
+      };
+    });
+    return questions;
+}
+
 export default function App() {
   //STATES & VARIABLES
   const [countries, setCountries] = useState([]);
+  const [level, setLevel] = useState({});
   const gameLength = 10;
 
   const [stage, setStage] = useState(0);
@@ -49,13 +87,22 @@ export default function App() {
     async function loadData() {
       const data = await fetchCountryData();
       setCountries(data);
-      
     }
 
     loadData();
   }, []);
 
-  console.log(countries);
+  //INITIALIZE QUIZ
+  useEffect(() => {
+    async function initQuiz() {
+      const lvl = await createLevel(countries, 10);
+      setLevel(lvl);
+    }
+
+    initQuiz();
+  }, [countries]);
+
+  console.log(level);
 
   function nextStage() {
     if (stage === 0 && !gameOn) handleStartGame();
@@ -123,7 +170,7 @@ function Answers() {
     if (!selected) setSelected(1);
     else setSelected(null);
   }
-  console.log(selected);
+  // console.log(selected);
 
   return (
     <div>
