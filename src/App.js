@@ -15,31 +15,65 @@ function shuffle(array) {
   return array;
 }
 
+async function fetchCountryData() {
+  //async enables await
+
+  //REQUEST DATA - fetch sends request to server - it returns a promise - await tells it to wait for a result
+  const response = await fetch("https://flagcdn.com/en/codes.json");
+
+  //EXTRACT ACTUAL DATA -
+  const data = await response.json();
+
+  //TRANSFORM DATA FORMAT - dictionary to array
+  const countries = Object.entries(data).map(([code, name]) => {
+    return { code, name };
+  });
+
+  return countries;
+}
+
 export default function App() {
   //STATES & VARIABLES
+  const [countries, setCountries] = useState([]);
   const gameLength = 10;
 
   const [stage, setStage] = useState(0);
-  const [gameOn, setGameOn] = useState(false)
+  const [gameOn, setGameOn] = useState(false);
+
+  // const levelList = createLevel();
 
   //FUNCTIONS
-  function nextStage(){
-    if (stage===0 && !gameOn) handleStartGame();
-    if (stage>=gameLength) handleLastStage();
-    else setStage(stage=>stage+1);
+
+  //LOADING DATA \/
+  useEffect(() => {
+    async function loadData() {
+      const data = await fetchCountryData();
+      setCountries(data);
+      
+    }
+
+    loadData();
+  }, []);
+
+  console.log(countries);
+
+  function nextStage() {
+    if (stage === 0 && !gameOn) handleStartGame();
+    if (stage >= gameLength) handleLastStage();
+    else setStage((stage) => stage + 1);
   }
-  function prevStage(){
-    if (stage<=1) return;
-    setStage(stage=>stage-1);
+  function prevStage() {
+    if (stage <= 1) return;
+    setStage((stage) => stage - 1);
   }
 
-  function handleStartGame(){
-     alert("Started game");
-     setGameOn(true)
+  function handleStartGame() {
+    alert("Started game");
+    setGameOn(true);
   }
-  function handleLastStage(){
+  function handleLastStage() {
     alert("Game completed");
-    setGameOn(false)
+    setGameOn(false);
   }
 
   return (
@@ -47,8 +81,12 @@ export default function App() {
       <h1>
         FLAG QUIZ stage: {stage}/{gameLength} {gameOn ? "Game On" : "Game Off"}
       </h1>
-      <button className="stage-navigation" onClick={()=>prevStage()}>{"<"}</button>
-      <button className="stage-navigation" onClick={()=>nextStage()}>{">"}</button>
+      <button className="stage-navigation" onClick={() => prevStage()}>
+        {"<"}
+      </button>
+      <button className="stage-navigation" onClick={() => nextStage()}>
+        {">"}
+      </button>
       {gameOn && <Quiz />}
     </div>
   );
@@ -80,16 +118,18 @@ function Flag() {
   );
 }
 function Answers() {
-  const [selected, setSelected] = useState(null)
-  function handleSelect(){
+  const [selected, setSelected] = useState(null);
+  function handleSelect() {
     if (!selected) setSelected(1);
-    else setSelected(null)
+    else setSelected(null);
   }
-  console.log(selected)
+  console.log(selected);
 
   return (
     <div>
-      <Option selected ={selected} onSelect={handleSelect}>Option 1</Option>
+      <Option selected={selected} onSelect={handleSelect}>
+        Option 1
+      </Option>
       <Option>Option 2</Option>
       <Option>Option 3</Option>
       <Option>Option 4</Option>
@@ -97,8 +137,14 @@ function Answers() {
   );
 }
 function Option({ children, selected, onSelect }) {
-  
-  return <button onClick={onSelect} style={selected && {backgroundColor: "gray", color: "white"}}>{children}</button>;
+  return (
+    <button
+      onClick={onSelect}
+      style={selected && { backgroundColor: "gray", color: "white" }}
+    >
+      {children}
+    </button>
+  );
 }
 function ProgressBar() {
   return (

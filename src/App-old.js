@@ -15,6 +15,8 @@ function shuffle(array) {
   return array;
 }
 
+
+
 export default function App() {
   //STATES
   const [countryList, setCountryList] = useState(null);
@@ -88,19 +90,18 @@ function Quiz({ countryList, stage, handleProgress, handleOption, gameSize }) {
     setRandCountry(() => getRandomCountry());
   }
 
-
-
   // console.log(getRandomCountry())
   // setRandCountry({code:"eg", name:"egypt"})
 
   return (
     <div>
-      <Flag current={randCountry} stage={stage}/>
-      <Answers answer={randCountry} choices={choices} handleOption={handleOption}/>
-      <ProgressBar
-        stage={stage}
-        gameSize={gameSize}
+      <Flag current={randCountry} stage={stage} />
+      <Answers
+        answer={randCountry}
+        choices={choices}
+        handleOption={handleOption}
       />
+      <ProgressBar stage={stage} gameSize={gameSize} />
     </div>
   );
 }
@@ -119,7 +120,7 @@ function Flag({ current, stage }) {
 }
 function Answers({ current, choices, handleOption }) {
   const shuffled = shuffle(choices.slice());
-  console.log(choices)
+  console.log(choices);
 
   return (
     <div>
