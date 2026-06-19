@@ -43,11 +43,20 @@ async function createLevel(data, len) {
   const questions = shuffledEntries
     .slice(0, len)
     .map(([correctCode, correctName], index) => {
+      let flag = correctName.code
+      // console.log("Correct code:" + correctCode);
+      // console.log("Correct Name:" + correctName.code);
+      // console.log("Index:" + index);
+
       //TAKE 3 DISTRACTORS (NEXT 3 ELEMENTS IN ARRAY)
       const distractors = shuffledEntries.slice(len + index, len + index + 3);
 
+      // console.log(distractors)
+
       //COMBINE CORRECT + DISTRACTORS
       const rawOptions = [[correctCode, correctName], ...distractors];
+
+      // console.log(rawOptions)
 
       //BUILD OPTIONS ARRAY * len
 
@@ -57,16 +66,20 @@ async function createLevel(data, len) {
         isCorrect: code === correctCode,
       }));
 
+      // console.log(options)
+
       //SHUFFLE THE 4 OPTIONS
       const shuffledOptions = shuffle(options);
 
+      // console.log(shuffledOptions)
+
       //RETURN IMAGE LINK + LEVEL OPTIONS DATA
       return {
-        imageLink: `https://flagcdn.com/w160/${correctCode}.png`,
+        imageLink: `https://flagcdn.com/w160/${flag}.png`,
         options: shuffledOptions,
       };
     });
-    return questions;
+  return questions;
 }
 
 export default function App() {
@@ -95,7 +108,7 @@ export default function App() {
   //INITIALIZE QUIZ
   useEffect(() => {
     async function initQuiz() {
-      const lvl = await createLevel(countries, 10);
+      const lvl = await createLevel(countries, gameLength);
       setLevel(lvl);
     }
 
