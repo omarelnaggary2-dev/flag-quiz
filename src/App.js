@@ -43,7 +43,7 @@ async function createLevel(data, len) {
   const questions = shuffledEntries
     .slice(0, len)
     .map(([correctCode, correctName], index) => {
-      let flag = correctName.code
+      let flag = correctName.code;
       // console.log("Correct code:" + correctCode);
       // console.log("Correct Name:" + correctName.code);
       // console.log("Index:" + index);
@@ -115,7 +115,7 @@ export default function App() {
     initQuiz();
   }, [countries]);
 
-  console.log(level);
+  // console.log(level);
 
   function nextStage() {
     if (stage === 0 && !gameOn) handleStartGame();
@@ -147,29 +147,31 @@ export default function App() {
       <button className="stage-navigation" onClick={() => nextStage()}>
         {">"}
       </button>
-      {gameOn && <Quiz />}
+      {gameOn && <Quiz level={level} stage={stage} gameLength={gameLength} />}
     </div>
   );
 }
 
-function Quiz() {
+function Quiz({ level, stage, gameLength }) {
   //STATES
   //VARIABLES
   //FUNCTIONS
 
   return (
-    <div>
-      <Flag />
-      <Answers />
-      <ProgressBar />
-    </div>
+    stage > gameLength || (
+      <div>
+        <Flag image={level[stage - 1].imageLink} />
+        <Answers options={level[stage - 1].options} />
+        <ProgressBar />
+      </div>
+    )
   );
 }
-function Flag() {
+function Flag({ image }) {
   return (
     <div>
       <img
-        src={`https://flagcdn.com/w160/eg.png`}
+        src={image}
         // srcSet={`https://flagcdn.com/w320/${x}.png 2x`}
         width="160"
         alt={"Egypt"}
@@ -177,7 +179,8 @@ function Flag() {
     </div>
   );
 }
-function Answers() {
+function Answers({ options }) {
+  console.log(options);
   const [selected, setSelected] = useState(null);
   function handleSelect() {
     if (!selected) setSelected(1);
@@ -187,12 +190,15 @@ function Answers() {
 
   return (
     <div>
-      <Option selected={selected} onSelect={handleSelect}>
-        Option 1
-      </Option>
-      <Option>Option 2</Option>
-      <Option>Option 3</Option>
-      <Option>Option 4</Option>
+      {options.map((opt) => (
+        <Option
+          key={opt.countryCode}
+          selected={selected}
+          onSelect={handleSelect}
+        >
+          {opt.countryName.name}
+        </Option>
+      ))}
     </div>
   );
 }
