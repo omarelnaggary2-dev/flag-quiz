@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 function getRandomCountry(data) {
+  //UNUSED
   const entries = Object.entries(data);
   const randomIndex = Math.floor(Math.random() * entries.length);
   const [code, name] = entries[randomIndex];
@@ -44,9 +45,6 @@ async function createLevel(data, len) {
     .slice(0, len)
     .map(([correctCode, correctName], index) => {
       let flag = correctName.code;
-      // console.log("Correct code:" + correctCode);
-      // console.log("Correct Name:" + correctName.code);
-      // console.log("Index:" + index);
 
       //TAKE 3 DISTRACTORS (NEXT 3 ELEMENTS IN ARRAY)
       const distractors = shuffledEntries.slice(len + index, len + index + 3);
@@ -56,8 +54,6 @@ async function createLevel(data, len) {
       //COMBINE CORRECT + DISTRACTORS
       const rawOptions = [[correctCode, correctName], ...distractors];
 
-      // console.log(rawOptions)
-
       //BUILD OPTIONS ARRAY * len
 
       const options = rawOptions.map(([code, name]) => ({
@@ -66,12 +62,8 @@ async function createLevel(data, len) {
         isCorrect: code === correctCode,
       }));
 
-      // console.log(options)
-
       //SHUFFLE THE 4 OPTIONS
       const shuffledOptions = shuffle(options);
-
-      // console.log(shuffledOptions)
 
       //RETURN IMAGE LINK + LEVEL OPTIONS DATA
       return {
@@ -88,10 +80,11 @@ export default function App() {
   const [level, setLevel] = useState({});
   const gameLength = 10;
 
-  const [stage, setStage] = useState(0);
-  const [gameOn, setGameOn] = useState(false);
+  const [selected, setSelected] = useState(null);
 
-  // const levelList = createLevel();
+  const [stage, setStage] = useState(0);
+  const [score, setScore] = useState(0);
+  const [gameOn, setGameOn] = useState(false);
 
   //FUNCTIONS
 
@@ -115,12 +108,21 @@ export default function App() {
     initQuiz();
   }, [countries]);
 
-  // console.log(level);
-
   function nextStage() {
+    calculateScore();
+    setSelected(null);
     if (stage === 0 && !gameOn) handleStartGame();
     if (stage >= gameLength) handleLastStage();
     else setStage((stage) => stage + 1);
+  }
+
+  function calculateScore() {
+    console.log(level[stage - 1]?.options[selected]?.isCorrect);
+    if (level[stage - 1]?.options[selected]?.isCorrect) increaseScore();
+  }
+
+  function increaseScore() {
+    setScore(score + 1);
   }
   function prevStage() {
     if (stage <= 1) return;
@@ -141,18 +143,39 @@ export default function App() {
       <h1>
         FLAG QUIZ stage: {stage}/{gameLength} {gameOn ? "Game On" : "Game Off"}
       </h1>
+      <h3>Score: {score}</h3>
       <button className="stage-navigation" onClick={() => prevStage()}>
         {"<"}
       </button>
       <button className="stage-navigation" onClick={() => nextStage()}>
         {">"}
       </button>
-      {gameOn && <Quiz level={level} stage={stage} gameLength={gameLength} />}
+      {gameOn && (
+        <Quiz
+          level={level}
+          stage={stage}
+          gameLength={gameLength}
+          nextStage={nextStage}
+          selected={selected}
+          setSelected={setSelected}
+          score={score}
+          increaseScore={increaseScore}
+        />
+      )}
     </div>
   );
 }
 
-function Quiz({ level, stage, gameLength }) {
+function Quiz({
+  level,
+  stage,
+  gameLength,
+  nextStage,
+  selected,
+  setSelected,
+  score,
+  increaseScore,
+}) {
   //STATES
   //VARIABLES
   //FUNCTIONS
@@ -161,7 +184,13 @@ function Quiz({ level, stage, gameLength }) {
     stage > gameLength || (
       <div>
         <Flag image={level[stage - 1].imageLink} />
-        <Answers options={level[stage - 1].options} />
+        <Answers
+          options={level[stage - 1].options}
+          selected={selected}
+          setSelected={setSelected}
+        />
+        <button onClick={nextStage}>GO</button>
+
         <ProgressBar />
       </div>
     )
@@ -179,22 +208,24 @@ function Flag({ image }) {
     </div>
   );
 }
-function Answers({ options }) {
-  console.log(options);
-  const [selected, setSelected] = useState(null);
-  function handleSelect() {
-    if (!selected) setSelected(1);
+function Answers({ options, selected, setSelected }) {
+  // console.log(selected);
+  // console.log(options);
+  function handleSelect(choice) {
+    if (!selected) setSelected(choice);
     else setSelected(null);
   }
+
   // console.log(selected);
 
   return (
     <div>
-      {options.map((opt) => (
+      {options.map((opt, index) => (
         <Option
           key={opt.countryCode}
           selected={selected}
-          onSelect={handleSelect}
+          onSelect={() => handleSelect(index)}
+          index={index}
         >
           {opt.countryName.name}
         </Option>
@@ -202,11 +233,15 @@ function Answers({ options }) {
     </div>
   );
 }
-function Option({ children, selected, onSelect }) {
+function Option({ children, selected, onSelect, index }) {
   return (
     <button
-      onClick={onSelect}
-      style={selected && { backgroundColor: "gray", color: "white" }}
+      onClick={() => onSelect(index)}
+      style={
+        selected === index
+          ? { backgroundColor: "gray", color: "white" }
+          : undefined
+      }
     >
       {children}
     </button>
