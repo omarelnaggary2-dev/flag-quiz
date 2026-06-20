@@ -78,13 +78,14 @@ export default function App() {
   //STATES & VARIABLES
   const [countries, setCountries] = useState([]);
   const [level, setLevel] = useState({});
-  const gameLength = 10;
+  const [gameLength, setGameLength] = useState(10);
 
   const [selected, setSelected] = useState(null);
 
   const [stage, setStage] = useState(0);
   const [score, setScore] = useState(0);
   const [gameOn, setGameOn] = useState(false);
+  const [gamePlayed, setGamePlayed] = useState(false)
 
   //FUNCTIONS
 
@@ -136,6 +137,7 @@ export default function App() {
   function handleLastStage() {
     alert("Game completed");
     setGameOn(false);
+    setGamePlayed(true);
   }
 
   return (
@@ -147,9 +149,9 @@ export default function App() {
       <button className="stage-navigation" onClick={() => prevStage()}>
         {"<"}
       </button>
-      <button className="stage-navigation" onClick={() => nextStage()}>
-        {">"}
-      </button>
+      {gameOn || <button className="stage-navigation" onClick={() => nextStage()}>
+        Start Game
+      </button>}
       {gameOn && (
         <Quiz
           level={level}
