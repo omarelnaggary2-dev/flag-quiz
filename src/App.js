@@ -78,14 +78,15 @@ export default function App() {
   //STATES & VARIABLES
   const [countries, setCountries] = useState([]);
   const [level, setLevel] = useState({});
-  const [gameLength, setGameLength] = useState(10);
+  const [gameLength, setGameLength] = useState(7);
 
   const [selected, setSelected] = useState(null);
 
   const [stage, setStage] = useState(0);
   const [score, setScore] = useState(0);
   const [gameOn, setGameOn] = useState(false);
-  const [gamePlayed, setGamePlayed] = useState(false)
+  const [gamePlayed, setGamePlayed] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(null);
 
   //FUNCTIONS
 
@@ -118,8 +119,11 @@ export default function App() {
   }
 
   function calculateScore() {
-    console.log(level[stage - 1]?.options[selected]?.isCorrect);
-    if (level[stage - 1]?.options[selected]?.isCorrect) increaseScore();
+    // console.log(level[stage - 1]?.options[selected]?.isCorrect);
+    if (level[stage - 1]?.options[selected]?.isCorrect) {
+      increaseScore();
+      setIsCorrect(true);
+    } else setIsCorrect(false);
   }
 
   function increaseScore() {
@@ -149,9 +153,11 @@ export default function App() {
       <button className="stage-navigation" onClick={() => prevStage()}>
         {"<"}
       </button>
-      {gameOn || <button className="stage-navigation" onClick={() => nextStage()}>
-        Start Game
-      </button>}
+      {gameOn || (
+        <button className="stage-navigation" onClick={() => nextStage()}>
+          Start Game
+        </button>
+      )}
       {gameOn && (
         <Quiz
           level={level}
@@ -162,6 +168,7 @@ export default function App() {
           setSelected={setSelected}
           score={score}
           increaseScore={increaseScore}
+          isCorrect={isCorrect}
         />
       )}
     </div>
@@ -177,6 +184,7 @@ function Quiz({
   setSelected,
   score,
   increaseScore,
+  isCorrect,
 }) {
   //STATES
   //VARIABLES
@@ -193,7 +201,14 @@ function Quiz({
         />
         <button onClick={nextStage}>GO</button>
 
-        <ProgressBar />
+        <ProgressBar
+          gameLength={gameLength}
+          selected={selected}
+          level={level}
+          stage={stage}
+          score={score}
+          isCorrect={isCorrect}
+        />
       </div>
     )
   );
@@ -249,15 +264,28 @@ function Option({ children, selected, onSelect, index }) {
     </button>
   );
 }
-function ProgressBar() {
+function ProgressBar({ gameLength, level, stage, selected, score, isCorrect }) {
   return (
     <div style={{ display: "flex" }}>
-      {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
-        <Stage key={num} />
+      {Array.from({ length: gameLength }, (_, i) => i + 1).map((num) => (
+        <Stage
+          key={num}
+          level={level}
+          stage={stage}
+          selected={selected}
+          index={num}
+          score={score}
+          isCorrect={isCorrect}
+        />
       ))}
     </div>
   );
 }
-function Stage() {
-  return <p>o</p>;
+function Stage({ level, stage, selected, index, score, isCorrect }) {
+  const [isGreen, setIsGreen] = useState(null);
+
+  // console.log("Index" + index);
+  // console.log("stage" + stage);
+
+  return <p>⚫</p>;
 }
