@@ -250,9 +250,10 @@ function Option({ children, selected, onSelect, index }) {
   );
 }
 function ProgressBar() {
+  const [progBar, setProgBar] = useState(Array.from({ length: 10 }, (_, i) => i + 1))
   return (
     <div style={{ display: "flex" }}>
-      {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+      {progBar.map((num) => (
         <Stage key={num} />
       ))}
     </div>
